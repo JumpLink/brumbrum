@@ -14,6 +14,15 @@ var getPageSize = function () {
 }
 
 /**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ * Quelle: http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
+ */
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
  * Alle benötigten SVG Dateien angular.identity()
  */
 var prepare = function (callback) {
@@ -101,27 +110,30 @@ var wheelAnimation = function (level0) {
  * Ins Haus fahren, warten und weiter fahren.
  * callback wird am Ende der Animtion aufgerufen.
  */
-var driveAnimation = function (level0, car, callback) {
+var driveAnimation = function (car, callback) {
   var driveInTime = 4;    // seconds
   var stayTime = 3;       // seconds
   var driveOutTime = 2;   // seconds
   var x = 0;
 
+  // replace level0 with new car
+  $("#level0").empty();
+  var level0 = Snap("#level0"); // level 0 - Ebene unter dem Haus
   level0.append(car.svg);   // cars[0].svg wird automatisch mittig in der SVG plaziert, da width: 100%
 
   // wheelAnimation(level0);
 
   // Auto startet außerhalb der Seite
   x = (((getPageSize().width + car.width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-  move('#car').x(x).duration('0s').end(function(){
+  move(car.selector).x(x).duration('0s').end(function(){
     // Auto fährt ins Haus 
     x = 0; // Null ist center innerhalt der SVG
-    move('#car').ease('out').x(x).duration(driveInTime+'s').end(function () {
+    move(car.selector).ease('out').x(x).duration(driveInTime+'s').end(function () {
       // Auto bleibt 3000 ms stehen
       setTimeout(function(){
         // Auto fährt wieder raus
         x = ((getPageSize().width + car.width) / 2 ) + 200 // berechnet den rechten Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-        move('#car').ease('in').x(x).duration(driveOutTime+'s').end(function () {
+        move(car.selector).ease('in').x(x).duration(driveOutTime+'s').end(function () {
           callback();
         });
       }, (stayTime * 1000));
@@ -132,14 +144,17 @@ var driveAnimation = function (level0, car, callback) {
 /*
  * Animationsinterval, ruft immer und immer wieder die Animation auf (rekursiv).
  */
-var driveAnimationInterval = function (level0, cars) {
+var driveAnimationInterval = function (cars, count) {
+  if(!count) count = 0;
   var duration = 4;       // seconds, Zeit die zwischen den Animationen vergeht
-  console.log("neuer Interval");
-  driveAnimation(level0, cars[0], function () {
-    setTimeout(function(){
-      driveAnimationInterval(level0, cars);
-    }, (duration * 1000));
-  });
+  var carIndex = getRandomInt(0, cars.length-1);
+  console.log(count+": neuer Interval mit car index: "+carIndex);
+  setTimeout(function() {
+    driveAnimation(cars[carIndex], function () {
+      driveAnimationInterval(cars, ++count);
+    });
+  }, (duration * 1000));
+
 }
 
 /**
@@ -148,7 +163,6 @@ var driveAnimationInterval = function (level0, cars) {
  * Für die Animation wird move.js verwendet: http://visionmedia.github.io/move.js/
  */
 $(document).ready(function() {
-  var level0 = Snap("#level0"); // level 0 - Ebene unter dem Haus
   var level1 = Snap("#level1"); // level 1 - auf gleicher Ebene wie das Haus bzw. Ebene für das Haus
   var cars = [];
   var house;
@@ -158,7 +172,7 @@ $(document).ready(function() {
     
     level1.append(house.svg);     // house.svg wird automatisch mittig in der SVG plaziert, da width: 100%
 
-    driveAnimationInterval(level0, cars);
+    driveAnimationInterval(cars);
 
   });
 
