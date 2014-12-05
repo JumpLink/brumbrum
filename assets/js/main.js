@@ -125,15 +125,16 @@ var driveAnimation = function (car, callback) {
 
   // Auto startet außerhalb der Seite
   x = (((getPageSize().width + car.width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-  move(car.selector).x(x).duration('0s').end(function(){
+  console.log($(car.selector));
+  move($(car.selector)[0]).x(x).duration('0s').end(function(){
     // Auto fährt ins Haus 
     x = 0; // Null ist center innerhalt der SVG
-    move(car.selector).ease('out').x(x).duration(driveInTime+'s').end(function () {
+    move($(car.selector)[0]).ease('out').x(x).duration(driveInTime+'s').end(function () {
       // Auto bleibt 3000 ms stehen
       setTimeout(function(){
         // Auto fährt wieder raus
         x = ((getPageSize().width + car.width) / 2 ) + 200 // berechnet den rechten Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-        move(car.selector).ease('in').x(x).duration(driveOutTime+'s').end(function () {
+        move($(car.selector)[0]).ease('in').x(x).duration(driveOutTime+'s').end(function () {
           callback();
         });
       }, (stayTime * 1000));
