@@ -13,11 +13,6 @@ var getPageSize = function () {
   return {width:width, height:height};
 }
 
-var getOutOfPageWidth = function (width) {
-  var page = getPageSize();
-  return result = (page.width + width) / 2 ;
-}
-
 /**
  * Alle benötigten SVG Dateien laden
  */
@@ -91,9 +86,10 @@ var prepare = function (callback) {
 
 /**
  * Darauf warten, dass die Seite vollständig geladen wurde.
+ * Für das dynamische einbinden und manipulieren von Vektorgrafiken wird Snap.svg verwendet: http://snapsvg.io/
+ * Für die Animation wird move.js verwendet: http://visionmedia.github.io/move.js/
  */
 $(document).ready(function() {
-
   var level0 = Snap("#level0"); // level 0 - Ebene unter dem Haus
   var level1 = Snap("#level1"); // level 1 - auf gleicher Ebene wie das Haus bzw. Ebene für das Haus
   var cars = [];
@@ -101,30 +97,32 @@ $(document).ready(function() {
   var driveInTime = 4; // seconds
   var stayTime = 3; // seconds
   var driveOutTime = 2; // seconds
+  var x = 0;
 
   prepare(function (error, data) {
     house = data.house;
     cars = data.cars;
     
-    level1.append(house.svg); // Car wird automatisch mittig in der SVG plaziert, da width: 100%
-
-    level0.append(cars[0].svg); // Car wird automatisch mittig in der SVG plaziert, da width: 100%
-    
-    // Für die Animation wird move.js verwendet: http://visionmedia.github.io/move.js/
+    level1.append(house.svg);     // Car wird automatisch mittig in der SVG plaziert, da width: 100%
+    level0.append(cars[0].svg);   // Car wird automatisch mittig in der SVG plaziert, da width: 100%
 
     // Auto startet außerhalb der Seite
-    move('#car').x(getOutOfPageWidth(cars[0].width) * -1).duration('0s').end();
+    x = (((getPageSize().width + cars[0].width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
+    move('#car').x(x).duration('0s').end(); 
 
     // Auto fährt ins Haus 
-    move('#car').ease('out').x(0).duration(driveInTime+'s').end();
+    x = 0;
+    move('#car').ease('out').x(x).duration(driveInTime+'s').end();
 
     // Auto bleibt 3000 ms stehen
     setTimeout(function(){
 
-      // Auto fährt wieder raus 
-      move('#car').ease('in').x(getOutOfPageWidth(cars[0].width)).duration(driveOutTime+'s').end();
+      // Auto fährt wieder raus
+      x = ((getPageSize().width + cars[0].width) / 2 ) + 200 // berechnet den rechten Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
+      move('#car').ease('in').x(x).duration(driveOutTime+'s').end();
 
     }, (driveInTime * 1000) + (stayTime * 1000));
+
 
 
   });
