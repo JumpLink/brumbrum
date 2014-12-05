@@ -1,0 +1,19 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#level0 {
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  height: 150px;
+  top: 194px; /*344px - 150px*/
+}
+
+#level1 {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 344px;
+}
