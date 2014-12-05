@@ -1,3 +1,11 @@
+var driveInTime = 4;    // seconds
+var stayTime = 3;       // seconds
+var driveOutTime = 2;   // seconds
+var x = 0;
+var duration = 4;       // seconds, Zeit die zwischen den Animationen vergeht
+var level1 = null;
+var level0 = null;
+
 /**
  * Ermittelt die Webseiten Breite und Höhe.
  * Inspiration: http://stackoverflow.com/questions/3437786/get-the-size-of-the-screen-current-web-page-and-browser-window
@@ -22,6 +30,14 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+var moveToStartPosition = function (car, callback) {
+  // Auto startet außerhalb der Seite
+  x = (((getPageSize().width + car.width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
+  move($(car.selector)[0]).x(x).duration('0s').end(function() {
+    callback();
+  });
+}
+
 /**
  * Alle benötigten SVG Dateien angular.identity()
  */
@@ -35,54 +51,105 @@ var prepare = function (callback) {
       width: 342,
       height: 150
     };
-    Snap.load("assets/images/folienhaus_cars-01.svg", function (svg) {
-      cars.push({
+
+    level1.append(house.svg);     // house.svg wird automatisch mittig in der SVG plaziert, da width: 100%
+
+    Snap.load("assets/images/folienhaus_cars-00.svg", function (svg) {
+      var car = {
         selector: selector = '#car',
         svg: svg,
         element: svg.select(selector),
         width: 256,
         height: 150
-      });
-      Snap.load("assets/images/folienhaus_cars-02.svg", function (svg) {
-        cars.push({
+      };
+
+      cars.push(car);
+
+      // Ändere ID um sie eindeutig zu machen (es dürfen nicht alle autos die selbe id haben)
+      level0.append(car.svg);   // cars[0].svg wird automatisch mittig in der SVG plaziert, da width: 100%
+      $(car.selector).attr('id', 'car0');
+      car.selector = 'car0';
+
+      Snap.load("assets/images/folienhaus_cars-01.svg", function (svg) {
+        var car = {
           selector: selector = '#car',
           svg: svg,
           element: svg.select(selector),
           width: 294,
           height: 97
+        };
+
+        level0.append(car.svg);
+        moveToStartPosition(car, function() {
+
         });
-        Snap.load("assets/images/folienhaus_cars-03.svg", function (svg) {
-          cars.push({
+        $(car.selector).attr('id', 'car1');
+        car.selector = 'car1';
+
+        Snap.load("assets/images/folienhaus_cars-02.svg", function (svg) {
+          var car = {
             selector: selector = '#car',
             svg: svg,
             element: svg.select(selector),
             width: 365,
             height: 150
+          };
+
+          level0.append(car.svg);
+          moveToStartPosition(car, function(){
+
           });
-          Snap.load("assets/images/folienhaus_cars-04.svg", function (svg) {
-            cars.push({
+          $(car.selector).attr('id', 'car2');
+          car.selector = 'car2';
+
+          Snap.load("assets/images/folienhaus_cars-03.svg", function (svg) {
+            var car = {
               selector: selector = '#car',
               svg: svg,
               element: svg.select(selector),
               width: 292,
               height: 101
+            };
+
+            level0.append(car.svg);
+            moveToStartPosition(car, function(){
+
             });
-            Snap.load("assets/images/folienhaus_cars-05.svg", function (svg) {
-              cars.push({
+            $(car.selector).attr('id', 'car3');
+            car.selector = 'car3';
+
+            Snap.load("assets/images/folienhaus_cars-04.svg", function (svg) {
+              var car = {
                 selector: selector = '#car',
                 svg: svg,
                 element: svg.select(selector),
                 width: 302,
                 height: 124
+              };
+
+              level0.append(car.svg);
+              moveToStartPosition(car, function(){
+
               });
-              Snap.load("assets/images/folienhaus_cars-06.svg", function (svg) {
-                cars.push({
+              $(car.selector).attr('id', 'car4');
+              car.selector = 'car4';
+
+              Snap.load("assets/images/folienhaus_cars-05.svg", function (svg) {
+                var car = {
                   selector: selector = '#car',
                   svg: svg,
                   element: svg.select(selector),
                   width: 295,
                   height: 99
+                };
+
+                level0.append(car.svg);
+                moveToStartPosition(car, function(){
+
                 });
+                $(car.selector).attr('id', 'car5');
+                car.selector = 'car5';
+
                 callback(null, {house:house, cars:cars});
               });
             });
@@ -94,7 +161,7 @@ var prepare = function (callback) {
 }
 
 // TODO center punkt finden
-var wheelAnimation = function (level0) {
+var wheelAnimation = function () {
   var wheel = level0.select('#wheel1');
   wheel.stop().animate(
     { transform: 'r90,256,256'}, // Basic rotation around a point. No frills.
@@ -111,22 +178,16 @@ var wheelAnimation = function (level0) {
  * callback wird am Ende der Animtion aufgerufen.
  */
 var driveAnimation = function (car, callback) {
-  var driveInTime = 4;    // seconds
-  var stayTime = 3;       // seconds
-  var driveOutTime = 2;   // seconds
-  var x = 0;
+
 
   // replace level0 with new car
-  $("#level0").empty();
-  var level0 = Snap("#level0"); // level 0 - Ebene unter dem Haus
-  level0.append(car.svg);   // cars[0].svg wird automatisch mittig in der SVG plaziert, da width: 100%
+  // $("#level0").empty();
+  
 
   // wheelAnimation(level0);
 
   // Auto startet außerhalb der Seite
-  x = (((getPageSize().width + car.width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-  console.log($(car.selector));
-  move($(car.selector)[0]).x(x).duration('0s').end(function(){
+  moveToStartPosition(car, function(){
     // Auto fährt ins Haus 
     x = 0; // Null ist center innerhalt der SVG
     move($(car.selector)[0]).ease('out').x(x).duration(driveInTime+'s').end(function () {
@@ -147,7 +208,6 @@ var driveAnimation = function (car, callback) {
  */
 var driveAnimationInterval = function (cars, count) {
   if(!count) count = 0;
-  var duration = 4;       // seconds, Zeit die zwischen den Animationen vergeht
   var carIndex = getRandomInt(0, cars.length-1);
   console.log(count+": neuer Interval mit car index: "+carIndex);
   setTimeout(function() {
@@ -164,14 +224,14 @@ var driveAnimationInterval = function (cars, count) {
  * Für die Animation wird move.js verwendet: http://visionmedia.github.io/move.js/
  */
 $(document).ready(function() {
-  var level1 = Snap("#level1"); // level 1 - auf gleicher Ebene wie das Haus bzw. Ebene für das Haus
+  level1 = Snap("#level1");     // level 1 - auf gleicher Ebene wie das Haus bzw. Ebene für das Haus
+  level0 = Snap("#level0"); // level 0 - Ebene unter dem Haus
   var cars = [];
   var house;
+
   prepare(function (error, data) {
     house = data.house;
     cars = data.cars;
-    
-    level1.append(house.svg);     // house.svg wird automatisch mittig in der SVG plaziert, da width: 100%
 
     driveAnimationInterval(cars);
 
