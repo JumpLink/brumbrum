@@ -31,9 +31,25 @@ function getRandomInt(min, max) {
 }
 
 var moveToStartPosition = function (car, callback) {
+
+  console.log("moveToStartPosition", car);
   // Auto startet außerhalb der Seite
   x = (((getPageSize().width + car.width) / 2 ) * -1) + 200 // berechnet den linken Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-  move($(car.selector)[0]).x(x).duration('0s').end(function() {
+  move(car.selector).x(x).duration('0s').end(callback);
+}
+
+var moveToCenterPosition = function (car, callback) {
+  x = 0; // Null ist center innerhalt der SVG
+  move(car.selector).ease('out').x(x).duration(driveInTime+'s').end(callback);
+}
+
+var waitOnPosition = function (callback) {
+  setTimeout(callback, (stayTime * 1000));
+}
+
+var moveToEndPosition = function (car, callback) {
+  x = ((getPageSize().width + car.width) / 2 ) + 200 // berechnet den rechten Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
+  move(car.selector).ease('in').x(x).duration(driveOutTime+'s').end(function () {
     callback();
   });
 }
@@ -67,6 +83,9 @@ var prepare = function (callback) {
 
       // Ändere ID um sie eindeutig zu machen (es dürfen nicht alle autos die selbe id haben)
       level0.append(car.svg);   // cars[0].svg wird automatisch mittig in der SVG plaziert, da width: 100%
+      moveToStartPosition(car, function() {
+
+      });
       $(car.selector).attr('id', 'car0');
       car.selector = 'car0';
 
@@ -161,44 +180,32 @@ var prepare = function (callback) {
 }
 
 // TODO center punkt finden
-var wheelAnimation = function () {
-  var wheel = level0.select('#wheel1');
-  wheel.stop().animate(
-    { transform: 'r90,256,256'}, // Basic rotation around a point. No frills.
-    1000, // drehgeschwindigkeit
-    function() { 
-      wheel.attr({ transform: 'rotate(0 256 256)'}); // Reset the position of the wheel.
-      wheelAnimation(); // Repeat this animation so it appears infinite.
-    }
-  );
-}
+// var wheelAnimation = function () {
+//   var wheel = level0.select('#wheel1');
+//   wheel.stop().animate(
+//     { transform: 'r90,256,256'}, // Basic rotation around a point. No frills.
+//     1000, // drehgeschwindigkeit
+//     function() { 
+//       wheel.attr({ transform: 'rotate(0 256 256)'}); // Reset the position of the wheel.
+//       wheelAnimation(); // Repeat this animation so it appears infinite.
+//     }
+//   );
+// }
 
 /*
  * Ins Haus fahren, warten und weiter fahren.
  * callback wird am Ende der Animtion aufgerufen.
  */
 var driveAnimation = function (car, callback) {
-
-
-  // replace level0 with new car
-  // $("#level0").empty();
-  
-
-  // wheelAnimation(level0);
-
   // Auto startet außerhalb der Seite
-  moveToStartPosition(car, function(){
+  moveToStartPosition(car, function() {
     // Auto fährt ins Haus 
-    x = 0; // Null ist center innerhalt der SVG
-    move($(car.selector)[0]).ease('out').x(x).duration(driveInTime+'s').end(function () {
-      // Auto bleibt 3000 ms stehen
-      setTimeout(function(){
+    moveToCenterPosition(car, function () {
+      // Auto bleibt stehen
+      waitOnPosition(function () {
         // Auto fährt wieder raus
-        x = ((getPageSize().width + car.width) / 2 ) + 200 // berechnet den rechten Außenbereich der Seite + 200px zur Sicherheit (falls das Browserfenster vergrößert wird)
-        move($(car.selector)[0]).ease('in').x(x).duration(driveOutTime+'s').end(function () {
-          callback();
-        });
-      }, (stayTime * 1000));
+        moveToEndPosition(car, callback);
+      });
     });
   });
 }
