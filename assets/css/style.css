@@ -3,7 +3,7 @@ body {
   margin: 0;
 }
 
-#level0 {
+#level0{
   position: absolute;
   z-index: 0;
   width: 100%;
@@ -11,7 +11,7 @@ body {
   top: 194px; /*344px - 150px*/
 }
 
-#level1 {
+#level1 { 
   z-index: 1;
   position: absolute;
   width: 100%;
